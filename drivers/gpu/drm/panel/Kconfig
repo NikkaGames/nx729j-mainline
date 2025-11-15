@@ -75,6 +75,14 @@ config DRM_PANEL_BOE_TD4320
 	help
 	  Say Y here if you want to enable support for BOE TD4320 1080x2340
 	  video mode panel found in Xiaomi Redmi Note 7 smartphones.
+	  
+config DRM_PANEL_BF068_RM692H0
+	tristate "BOE RM692H0 panel"
+	depends on OF
+	depends on DRM_MIPI_DSI
+	depends on BACKLIGHT_CLASS_DEVICE
+	help
+	  RedMagic 8 Pro panel
 
 config DRM_PANEL_BOE_TH101MB31UIG002_28A
 	tristate "Boe TH101MB31UIG002-28A panel"

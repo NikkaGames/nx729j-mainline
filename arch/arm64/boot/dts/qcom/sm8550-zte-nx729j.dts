@@ -56,7 +56,7 @@
 		#address-cells = <2>;
 		#size-cells = <2>;
 		ranges;
-		bootargs = "root=/dev/sda15 rootwait rw acpi=off console=tty1 clk_ignore_unused pd_ignore_unused loglevel=8 udmabuf.size_limit_mb=256";
+		bootargs = "root=/dev/sda15 rootwait rw acpi=off clk_ignore_unused pd_ignore_unused";
 		
 		framebuffer: framebuffer@b8000000 {
 			compatible = "simple-framebuffer";
@@ -65,7 +65,6 @@
 			height = <2480>;
 			stride = <(1116 * 4)>;
 			format = "a8r8g8b8";
-			//clocks = <&gcc GCC_DISP_HF_AXI_CLK>;
 		};
 	};
 
@@ -113,56 +112,143 @@
 	};
 
 	reserved-memory {
-		xbl_ramdump_mem: xbl-ramdump-region@81200000 {
-			reg = <0 0x81200000 0 0x280000>;
+		#address-cells = <2>;
+		#size-cells = <2>;
+		ranges;
+		
+		hyp_mem: hyp-region@80000000 {
 			no-map;
+			reg = <0x00 0x80000000 0x00 0xa00000>;
 		};
 
-		xbl_dt_log_mem: xbl-dt-log-region@81a00000 {
-			reg = <0 0x81a00000 0 0x40000>;
+		cpusys_vm_mem: cpusys-vm-region@80a00000 {
 			no-map;
+			reg = <0x00 0x80a00000 0x00 0x400000>;
+		};
+
+		/* merged xbl_dt_log, xbl_ramdump, aop_image */
+		xbl_dt_log_merged_mem: xbl-dt-log-merged-region@81a00000 {
+			no-map;
+			reg = <0x00 0x81a00000 0x00 0x260000>;
+		};
+
+		aop_cmd_db_mem: aop-cmd-db-region@81c60000 {
+			compatible = "qcom,cmd-db";
+			no-map;
+			reg = <0x00 0x81c60000 0x00 0x20000>;
+		};
+
+		/* merged aop_config, tme_crash_dump, tme_log, uefi_log */
+		aop_config_merged_mem: aop-config-merged-region@81c80000 {
+			no-map;
+			reg = <0x00 0x81c80000 0x00 0x74000>;
 		};
 		
-		framebuffer_mem: framebuffer@b8000000 {
-			reg = <0x0 0xb8000000 0x0 0x2b00000>;
+		chipinfo_region: chipinfo-region@81cf4000 {
 			no-map;
+			reg = <0x00 0x81cf4000 0x00 0x1000>;
 		};
 
-		aop_image_mem: aop-image-region@81c00000 {
-			reg = <0 0x81c00000 0 0x60000>;
+		/* secdata region can be reused by apps */
+		smem: smem@81d00000 {
 			no-map;
+			reg = <0x00 0x81d00000 0x00 0x200000>;
+			hwlocks = <&tcsr_mutex 3>;
+			compatible = "qcom,smem";
+		};
+
+		adsp_mhi_mem: adsp-mhi-region@81f00000 {
+			no-map;
+			reg = <0x00 0x81f00000 0x00 0x20000>;
+		};
+		
+		tz_stat_region: tz-stat-region@82700000 {
+			no-map;
+			reg = <0x00 0x82700000 0x00 0x100000>;
+		};
+		
+		mpss_mem: mpss-region@8a800000 {
+			no-map;
+			reg = <0x00 0x8a800000 0x00 0x10800000>;
+		};
+
+		q6_mpss_dtb_mem: q6-mpss-dtb-region@9b000000 {
+			no-map;
+			reg = <0x00 0x9b000000 0x00 0x80000>;
+		};
+
+		ipa_fw_mem: ipa-fw-region@9b080000 {
+			no-map;
+			reg = <0x00 0x9b080000 0x00 0x10000>;
+		};
+
+		ipa_gsi_mem: ipa-gsi-region@9b090000 {
+			no-map;
+			reg = <0x00 0x9b090000 0x00 0xa000>;
+		};
+
+		gpu_micro_code_mem: gpu-micro-code-region@9b09a000 {
+			no-map;
+			reg = <0x00 0x9b09a000 0x00 0x2000>;
+		};
+		
+		video_mem: video-region@9bb00000 {
+			no-map;
+			reg = <0x00 0x9bb00000 0x00 0x700000>;
+		};
+
+		cdsp_mem: cdsp-region@9c900000 {
+			no-map;
+			reg = <0x00 0x9c900000 0x00 0x2000000>;
+		};
+
+		q6_cdsp_dtb_mem: q6-cdsp-dtb-region@9e900000 {
+			no-map;
+			reg = <0x00 0x9e900000 0x00 0x80000>;
+		};
+
+		q6_adsp_dtb_mem: q6-adsp-dtb-region@9e980000 {
+			no-map;
+			reg = <0x00 0x9e980000 0x00 0x80000>;
 		};
 
 		adspslpi_mem: adspslpi-region@9ea00000 {
-			reg = <0 0x9ea00000 0 0x4080000>;
 			no-map;
+			reg = <0x00 0x9ea00000 0x00 0x4880000>;
 		};
 
-		rmtfs_mem: rmtfs-region@ccd00000 {
+		mpss_dsm_mem: mpss-dsm-region@d4d00000 {
+			no-map;
+			reg = <0x00 0xd4d00000 0x00 0x3300000>;
+		};
+
+		xbl_sc_mem: xbl-sc-region@d8100000 {
+			no-map;
+			reg = <0x00 0xd8100000 0x00 0x40000>;
+		};
+
+		cpucp_fw_mem: cpucp-fw-region@d8140000 {
+			no-map;
+			reg = <0x00 0xd8140000 0x00 0x1c0000>;
+		};
+
+		qtee_mem: qtee-region@d8300000 {
+			no-map;
+			reg = <0x00 0xd8300000 0x00 0x500000>;
+		};
+
+		hwfence_shbuf: hwfence-shbuf-region@e6440000 {
+			no-map;
+			reg = <0x00 0xe6440000 0x00 0x2dd000>;
+		};
+
+		rmtfs_mem: rmtfs-region@e8100000 {
 			compatible = "qcom,rmtfs-mem";
-			reg = <0x0 0xccd00000 0x0 0x280000>;
+			reg = <0x0 0xe8100000 0x0 0x280000>;
 			no-map;
 
 			qcom,client-id = <1>;
 			qcom,vmid = <QCOM_SCM_VMID_MSS_MSA>;
-		};
-
-		hwfence_shbuf: hwfence-shbuf-region@e6440000 {
-			reg = <0 0xe6440000 0 0x2dd000>;
-			no-map;
-		};
-
-		llcc_lpi_mem: llcc-lpi-region@ff800000 {
-			reg = <0 0xff800000 0 0x600000>;
-			no-map;
-		};
-
-		/* Required for libcamera to allocate buffers when cma is used. */
-		linux,cma {
-			compatible = "shared-dma-pool";
-			size = <0x0 0x30000000>;
-			reusable;
-			linux,cma-default;
 		};
 	};
 
@@ -174,6 +260,65 @@
 
 		regulator-always-on;
 		regulator-boot-on;
+	};
+	
+	wcn7850-pmu {
+		compatible = "qcom,wcn7850-pmu";
+
+		pinctrl-names = "default";
+		pinctrl-0 = <&wlan_en>, <&bt_default>, <&pmk8550_sleep_clk>;
+
+		wlan-enable-gpios = <&tlmm 80 GPIO_ACTIVE_HIGH>;
+		bt-enable-gpios = <&tlmm 81 GPIO_ACTIVE_HIGH>;
+
+		vdd-supply = <&vreg_s5g_0p8>;
+		vddio-supply = <&vreg_l15b_1p8>; 
+		vddaon-supply = <&vreg_s2g_0p8>;
+		vdddig-supply = <&vreg_s4e_0p9>;
+		vddrfa1p2-supply = <&vreg_s4g_1p3>;
+		vddrfa1p8-supply = <&vreg_s6g_1p8>;
+
+		regulators {
+			vreg_pmu_rfa_cmn: ldo0 {
+				regulator-name = "vreg_pmu_rfa_cmn";
+			};
+
+			vreg_pmu_aon_0p59: ldo1 {
+				regulator-name = "vreg_pmu_aon_0p59";
+			};
+
+			vreg_pmu_wlcx_0p8: ldo2 {
+				regulator-name = "vreg_pmu_wlcx_0p8";
+			};
+
+			vreg_pmu_wlmx_0p85: ldo3 {
+				regulator-name = "vreg_pmu_wlmx_0p85";
+			};
+
+			vreg_pmu_btcmx_0p85: ldo4 {
+				regulator-name = "vreg_pmu_btcmx_0p85";
+			};
+
+			vreg_pmu_rfa_0p8: ldo5 {
+				regulator-name = "vreg_pmu_rfa_0p8";
+			};
+
+			vreg_pmu_rfa_1p2: ldo6 {
+				regulator-name = "vreg_pmu_rfa_1p2";
+			};
+
+			vreg_pmu_rfa_1p8: ldo7 {
+				regulator-name = "vreg_pmu_rfa_1p8";
+			};
+
+			vreg_pmu_pcie_0p9: ldo8 {
+				regulator-name = "vreg_pmu_pcie_0p9";
+			};
+
+			vreg_pmu_pcie_1p8: ldo9 {
+				regulator-name = "vreg_pmu_pcie_1p8";
+			};
+		};
 	};
 };
 
@@ -222,13 +367,6 @@
 			regulator-max-microvolt = <3008000>;
 			regulator-initial-mode = <RPMH_REGULATOR_MODE_HPM>;
 		};
-
-		/*vreg_l4b_1p8: ldo4 { // Not present
-			regulator-name = "vreg_l4b_1p8";
-			regulator-min-microvolt = <1800000>;
-			regulator-max-microvolt = <1800000>;
-			regulator-initial-mode = <RPMH_REGULATOR_MODE_HPM>;
-		};*/
 
 		vreg_l5b_3p1: ldo5 {
 			regulator-name = "vreg_l5b_3p1";
@@ -669,6 +807,34 @@
 		bias-disable;
 		output-low;
 	};
+	
+	sde_dsi_active: sde-dsi-active-state {
+		pins = "gpio133";
+		function = "gpio";
+		drive-strength = <8>;
+		bias-disable;
+	};
+
+	sde_dsi_suspend: sde-dsi-suspend-state {
+		pins = "gpio133";
+		function = "gpio";
+		drive-strength = <2>;
+		bias-pull-down;
+	};
+
+	sde_te_active: sde-te-active-state {
+		pins = "gpio86";
+		function = "mdp_vsync";
+		drive-strength = <2>;
+		bias-pull-down;
+	};
+
+	sde_te_suspend: sde-te-suspend-state {
+		pins = "gpio86";
+		function = "mdp_vsync";
+		drive-strength = <2>;
+		bias-pull-down;
+	};
 };
 
 &pm8010_n {
@@ -683,17 +849,46 @@
 	status = "okay";
 };
 
-&gpu {
-	status = "disabled";
-
-	/*zap-shader {
-		firmware-name = "qcom/sm8550/nx729j/a740_zap.mbn";
-	};*/
-};
-
 &pm8550b_eusb2_repeater {
 	vdd18-supply = <&vreg_l15b_1p8>;
 	vdd3-supply = <&vreg_l5b_3p1>;
+};
+
+&qupv3_id_0 {
+	status = "okay";
+};
+
+&qupv3_id_1 {
+	status = "okay";
+};
+
+&pmk8550_rtc {
+	nvmem-cells = <&rtc_offset>;
+	nvmem-cell-names = "offset";
+};
+
+&pmk8550_sdam_2 {
+	rtc_offset: rtc-offset@bc {
+		reg = <0xbc 0x4>;
+	};
+};
+
+&remoteproc_adsp {
+	firmware-name = "qcom/sm8550/nx729j/adsp.mbn",
+			"qcom/sm8550/nx729j/adsp_dtb.mbn";
+	status = "okay";
+};
+
+&remoteproc_cdsp {
+	firmware-name = "qcom/sm8550/nx729j/cdsp.mbn",
+			"qcom/sm8550/nx729j/cdsp_dtb.mbn";
+	status = "okay";
+};
+
+&remoteproc_mpss {
+	firmware-name = "qcom/sm8550/nx729j/modem.mbn",
+			"qcom/sm8550/nx729j/modem_dtb.mbn";
+	status = "disabled";
 };
 
 &i2c_master_hub_0 {
@@ -728,6 +923,133 @@
 	status = "disabled";
 };
 
+&mdss_dsi0 {
+	vdda-supply = <&vreg_l3e_1p2>;
+	status = "okay";
+	
+	panel@0 {
+		compatible = "mdss,bf068-rm692h0-6p97-magic-dsc";
+		reg = <0>;
+		
+		pinctrl-names = "default", "sleep";
+		pinctrl-0 = <&sde_dsi_active>, <&sde_te_active>;
+		pinctrl-1 = <&sde_dsi_suspend>, <&sde_te_suspend>;
+
+		vddio-supply = <&vreg_l12b_1p8>;
+		vci-supply = <&vreg_l13b_3p3>;
+		
+		reset-gpios = <&tlmm 133 GPIO_ACTIVE_LOW>;
+
+		port {
+			panel_in: endpoint {
+				remote-endpoint = <&mdss_dsi0_out>;
+			};
+		};
+	};
+};
+
+&mdss_dsi0_out {
+	status = "okay";
+	data-lanes = <0 1 2 3>;
+	remote-endpoint = <&panel_in>;
+};
+
+&mdss_dsi0_phy {
+	vdds-supply = <&vreg_l1e_0p88>;
+	status = "okay";
+};
+
+&mdss_dp0 {
+	status = "okay";
+};
+
+&mdss_dp0_out {
+	data-lanes = <0 1>;
+};
+
+&ipa {
+	qcom,gsi-loader = "self";
+	memory-region = <&ipa_fw_mem>;
+	firmware-name = "qcom/sm8550/nx729j/ipa_fws.mbn";
+	status = "okay";
+};
+
+&gpu {
+	status = "okay";
+
+	zap-shader {
+		firmware-name = "qcom/sm8550/nx729j/a740_zap.mbn";
+	};
+};
+
+&pmk8550_gpios {
+	pmk8550_sleep_clk: sleep-clk-state {
+		pins = "gpio3";
+		function = "func1";
+		input-disable;
+		output-enable;
+		bias-disable;
+		power-source = <0>;
+	};
+};
+
+&pcie0 {
+	wake-gpios = <&tlmm 96 GPIO_ACTIVE_HIGH>;
+	perst-gpios = <&tlmm 94 GPIO_ACTIVE_LOW>;
+
+	pinctrl-names = "default";
+	pinctrl-0 = <&pcie0_default_state>;
+
+	status = "okay";
+};
+
+&pcieport0 {
+	status = "okay";
+	
+	wifi@0 {
+		compatible = "pci17cb,1107";
+		reg = <0x10000 0x0 0x0 0x0 0x0>;
+
+		vddrfacmn-supply = <&vreg_pmu_rfa_cmn>;
+		vddaon-supply = <&vreg_pmu_aon_0p59>;
+		vddwlcx-supply = <&vreg_pmu_wlcx_0p8>;
+		vddwlmx-supply = <&vreg_pmu_wlmx_0p85>;
+		vddrfa0p8-supply = <&vreg_pmu_rfa_0p8>;
+		vddrfa1p2-supply = <&vreg_pmu_rfa_1p2>;
+		vddrfa1p8-supply = <&vreg_pmu_rfa_1p8>;
+		vddpcie0p9-supply = <&vreg_pmu_pcie_0p9>;
+		vddpcie1p8-supply = <&vreg_pmu_pcie_1p8>;
+		status = "okay";
+	};
+};
+
+&pcie0_phy {
+	vdda-phy-supply = <&vreg_l1e_0p88>;
+	vdda-pll-supply = <&vreg_l3e_1p2>;
+
+	status = "okay";
+};
+
+&uart14 {
+	status = "okay";
+
+	bluetooth {
+		compatible = "qcom,wcn7850-bt";
+
+		local-bd-address = [ c2 59 96 e0 ca 00 ];
+
+		vddrfacmn-supply = <&vreg_pmu_rfa_cmn>;
+		vddaon-supply = <&vreg_pmu_aon_0p59>;
+		vddwlcx-supply = <&vreg_pmu_wlcx_0p8>;
+		vddwlmx-supply = <&vreg_pmu_wlmx_0p85>;
+		vddrfa0p8-supply = <&vreg_pmu_rfa_0p8>;
+		vddrfa1p2-supply = <&vreg_pmu_rfa_1p2>;
+		vddrfa1p8-supply = <&vreg_pmu_rfa_1p8>;
+
+		max-speed = <3200000>;
+	};
+};
+
 &ufs_mem_hc {
 	reset-gpios = <&tlmm 210 GPIO_ACTIVE_LOW>;
 	vcc-supply = <&vreg_l17b_2p5>;
@@ -748,6 +1070,10 @@
 
 &usb_1 {
 	status = "okay";
+};
+
+&usb_1_dwc3 {
+	dr_mode = "host";
 };
 
 &usb_1_dwc3_hs {
