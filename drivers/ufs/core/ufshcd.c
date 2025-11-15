@@ -3170,8 +3170,8 @@ ufshcd_dev_cmd_completion(struct ufs_hba *hba, struct ufshcd_lrb *lrbp)
 			err = ufshcd_copy_query_response(hba, lrbp);
 		} else {
 			err = -EINVAL;
-			dev_err(hba->dev, "%s: unexpected response in Query RSP: %x\n",
-					__func__, response);
+			//dev_err(hba->dev, "%s: unexpected response in Query RSP: %x\n",
+			//		__func__, response);
 		}
 		break;
 	}
@@ -8803,9 +8803,9 @@ static void ufshcd_set_timestamp_attr(struct ufs_hba *hba)
 
 	err = ufshcd_exec_dev_cmd(hba, DEV_CMD_TYPE_QUERY, dev_cmd_timeout);
 
-	if (err)
-		dev_err(hba->dev, "%s: failed to set timestamp %d\n",
-			__func__, err);
+	//if (err)
+	//	dev_err(hba->dev, "%s: failed to set timestamp %d\n",
+	//		__func__, err);
 
 	ufshcd_dev_man_unlock(hba);
 }

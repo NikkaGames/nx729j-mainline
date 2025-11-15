@@ -37,14 +37,12 @@ config USB_DWC3_HOST
 
 config USB_DWC3_GADGET
 	bool "Gadget only mode"
-	depends on USB_GADGET=y || USB_GADGET=USB_DWC3
 	help
 	  Select this when you want to use DWC3 in gadget mode only,
 	  thereby the host feature will be regressed.
 
 config USB_DWC3_DUAL_ROLE
 	bool "Dual Role mode"
-	depends on ((USB=y || USB=USB_DWC3) && (USB_GADGET=y || USB_GADGET=USB_DWC3))
 	help
 	  This is the default mode of working of DWC3 controller where
 	  both host and gadget features are enabled.
