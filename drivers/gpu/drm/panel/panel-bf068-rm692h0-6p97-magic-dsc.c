@@ -21,6 +21,7 @@
 struct bf068_rm692h0_6p97_magic_dsc {
 	struct drm_panel panel;
 	struct mipi_dsi_device *dsi;
+	struct regulator_bulk_data supplies[3];
 	struct drm_dsc_config dsc;
 	struct gpio_desc *reset_gpio;
 };
@@ -276,6 +277,12 @@ static int bf068_rm692h0_6p97_magic_dsc_prepare(struct drm_panel *panel)
 	struct device *dev = &ctx->dsi->dev;
 	struct drm_dsc_picture_parameter_set pps;
 	int ret;
+	
+	ret = regulator_bulk_enable(ARRAY_SIZE(ctx->supplies), ctx->supplies);
+	if (ret < 0) {
+		dev_err(dev, "Failed to enable regulators: %d\n", ret);
+		return ret;
+	}
 
 	bf068_rm692h0_6p97_magic_dsc_reset(ctx);
 
@@ -283,6 +290,7 @@ static int bf068_rm692h0_6p97_magic_dsc_prepare(struct drm_panel *panel)
 	if (ret < 0) {
 		dev_err(dev, "Failed to initialize panel: %d\n", ret);
 		gpiod_set_value_cansleep(ctx->reset_gpio, 1);
+		regulator_bulk_disable(ARRAY_SIZE(ctx->supplies), ctx->supplies);
 		return ret;
 	}
 
@@ -316,6 +324,7 @@ static int bf068_rm692h0_6p97_magic_dsc_unprepare(struct drm_panel *panel)
 		dev_err(dev, "Failed to un-initialize panel: %d\n", ret);
 
 	gpiod_set_value_cansleep(ctx->reset_gpio, 1);
+	regulator_bulk_disable(ARRAY_SIZE(ctx->supplies), ctx->supplies);
 
 	return 0;
 }
@@ -364,8 +373,6 @@ static int bf068_rm692h0_6p97_magic_dsc_bl_update_status(struct backlight_device
 	return 0;
 }
 
-// TODO: Check if /sys/class/backlight/.../actual_brightness actually returns
-// correct values. If not, remove this function.
 static int bf068_rm692h0_6p97_magic_dsc_bl_get_brightness(struct backlight_device *bl)
 {
 	struct mipi_dsi_device *dsi = bl_get_data(bl);
@@ -413,6 +420,14 @@ static int bf068_rm692h0_6p97_magic_dsc_probe(struct mipi_dsi_device *dsi)
 				   DRM_MODE_CONNECTOR_DSI);
 	if (IS_ERR(ctx))
 		return PTR_ERR(ctx);
+	
+	ctx->supplies[0].supply = "vdd";
+	ctx->supplies[1].supply = "vci";
+	ctx->supplies[2].supply = "vddio";
+	ret = devm_regulator_bulk_get(dev, ARRAY_SIZE(ctx->supplies),
+				      ctx->supplies);
+	if (ret < 0)
+		return dev_err_probe(dev, ret, "Failed to get regulators\n");
 
 	ctx->reset_gpio = devm_gpiod_get(dev, "reset", GPIOD_OUT_HIGH);
 	if (IS_ERR(ctx->reset_gpio))
