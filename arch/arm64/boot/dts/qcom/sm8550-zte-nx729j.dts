@@ -888,7 +888,7 @@
 &remoteproc_mpss {
 	firmware-name = "qcom/sm8550/nx729j/modem.mbn",
 			"qcom/sm8550/nx729j/modem_dtb.mbn";
-	status = "disabled";
+	status = "okay";
 };
 
 &i2c_master_hub_0 {
@@ -1074,6 +1074,7 @@
 };
 
 &usb_1_dwc3 {
+	status = "okay";
 	dr_mode = "host";
 };
 
